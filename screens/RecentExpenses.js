@@ -8,8 +8,8 @@ import { getDateMinusDate } from "../util/date";
 function RecentExpenses() {
 
     const expensesContext = useContext(ExpensesContext);
-
-    const recentExpenses = expensesContext.expenses.filter((expense) => {
+    console.log(expensesContext.expenses.filter(exp => exp.id))
+    const recentExpenses = expensesContext.expenses?.filter((expense) => {
         const today = new Date();
         const date7daysAgo = getDateMinusDate(today, 7);
         return expense.date > date7daysAgo;
