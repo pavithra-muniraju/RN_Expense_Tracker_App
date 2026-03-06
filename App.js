@@ -8,6 +8,7 @@ import ManageExpenses from './screens/ManageExpenses';
 import { GlobalStyles } from './constants/styles';
 import { Ionicons } from '@expo/vector-icons'
 import IconButton from './UI/IconButton';
+import ExpensesContextProvider from './store/ExpensesContext';
 
 export default function App() {
 
@@ -44,17 +45,19 @@ export default function App() {
   return (
     <>
       <StatusBar style="inverted" />
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{
-          headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
-          headerTintColor: 'white',
-        }}>
-          <Stack.Screen name="ExpensesOverview" component={ExpensesOverview} options={{ headerShown: false }} />
-          <Stack.Screen name="ManageExpenses" component={ManageExpenses} options={{
-            presentation: 'modal'
-          }} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <ExpensesContextProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{
+            headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
+            headerTintColor: 'white',
+          }}>
+            <Stack.Screen name="ExpensesOverview" component={ExpensesOverview} options={{ headerShown: false }} />
+            <Stack.Screen name="ManageExpenses" component={ManageExpenses} options={{
+              presentation: 'modal'
+            }} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ExpensesContextProvider>
     </>
 
   );
