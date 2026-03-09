@@ -4,12 +4,16 @@ import IconButton from '../UI/IconButton'
 import { GlobalStyles } from "../constants/styles";
 import Button from "../UI/Button";
 import { ExpensesContext } from "../store/ExpensesContext";
+import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 function ManageExpenses({ route, navigation }) {
 
     const expenseId = route.params?.expenseId;
     const isEditing = !!expenseId;
 
     const expensesContext = useContext(ExpensesContext);
+    
+    const selectedExpense = expensesContext.expenses.find(expense => expense.id == expenseId);
+
     useLayoutEffect(() => {
         navigation.setOptions({
             title: isEditing ? 'Edit Expenses' : 'Add Expenses'
@@ -25,37 +29,20 @@ function ManageExpenses({ route, navigation }) {
         navigation.goBack();
     }
 
-    function confirmHandler() {
+    function confirmHandler(expenseData) {
         if (isEditing) {
-            expensesContext.updateExpense(expenseId,
-                {
-                    desc: 'test',
-                    amount: 99,
-                    date: new Date('2020-05-19')
-                }
-            )
+            expensesContext.updateExpense(expenseId,expenseData )
         } else {
-            expensesContext.addExpense(
-                {
-                    desc: 'test',
-                    amount: 99,
-                    date: new Date('2020-05-19')
-                }
-            )
+            expensesContext.addExpense(expenseData)
         }
         navigation.goBack();
     }
 
     return (
         <View style={styles.constainer}>
-            <View style={styles.buttonStyles}>
-                <Button children='Cancel' mode='flat'
-                    onPress={cancelHandler}
-                    style={styles.backButton} />
-
-                <Button children={isEditing ? 'Update' : 'Add'}
-                    onPress={confirmHandler} style={styles.backButton} />
-            </View>
+            <ExpenseForm isEditing={isEditing} onCancel={cancelHandler} onSubmit={confirmHandler}
+            defaultValues={selectedExpense} />
+            
             {isEditing && (
                 <View style={styles.deleteContainer}>
                     <IconButton name="trash"

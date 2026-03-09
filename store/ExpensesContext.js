@@ -5,7 +5,7 @@ const DUMMY_EXPENSES = [
     id: 'e1',
     desc: 'A pair of shoes',
     amount: 59.99,
-    date: new Date('2025-12-19'),
+    date: new Date('2026-03-09'),
   },
   {
     id: 'e2',
@@ -23,7 +23,7 @@ const DUMMY_EXPENSES = [
     id: 'e4',
     desc: 'A book',
     amount: 14.99,
-    date: new Date('2026-02-28'),
+    date: new Date('2026-03-9'),
   },
   {
     id: 'e5',
@@ -35,7 +35,7 @@ const DUMMY_EXPENSES = [
     id: 'e6',
     desc: 'A pair of trousers',
     amount: 89.29,
-    date: new Date('2022-01-05'),
+    date: new Date('2026-03-07'),
   },
   {
     id: 'e7',
@@ -47,13 +47,13 @@ const DUMMY_EXPENSES = [
     id: 'e8',
     desc: 'A book',
     amount: 14.99,
-    date: new Date('2022-02-19'),
+    date: new Date('2026-03-07'),
   },
   {
     id: 'e9',
     desc: 'Another book',
     amount: 18.59,
-    date: new Date('2026-03-01'),
+    date: new Date('2026-03-07'),
   },
 ];
 
