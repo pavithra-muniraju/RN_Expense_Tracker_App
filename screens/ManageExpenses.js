@@ -1,4 +1,4 @@
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import IconButton from '../UI/IconButton'
 import { GlobalStyles } from "../constants/styles";
@@ -6,6 +6,7 @@ import Button from "../UI/Button";
 import { ExpensesContext } from "../store/ExpensesContext";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 import { deleteExpense, storeExpense, updateExpense } from "../util/http";
+import LoadingOverlay from "../UI/LoadingOverlay";
 function ManageExpenses({ route, navigation }) {
 
     const expenseId = route.params?.expenseId;
@@ -15,6 +16,8 @@ function ManageExpenses({ route, navigation }) {
     
     const selectedExpense = expensesContext.expenses.find(expense => expense.id == expenseId);
 
+    const [isSubmitting, setIsSubmiiting] = useState()
+
     useLayoutEffect(() => {
         navigation.setOptions({
             title: isEditing ? 'Edit Expenses' : 'Add Expenses'
@@ -22,9 +25,12 @@ function ManageExpenses({ route, navigation }) {
     }, [navigation, isEditing])
 
     async function deleteExpenseHandler() {
+        setIsSubmiiting(true);
         expensesContext.deleteExpense(expenseId);
         await deleteExpense(expenseId);
+        setIsSubmiiting(false)
         navigation.goBack();
+        
     }
 
     function cancelHandler() {
@@ -32,18 +38,26 @@ function ManageExpenses({ route, navigation }) {
     }
 
     async function confirmHandler(expenseData) {
+       
         if (isEditing) {
+             setIsSubmiiting(true)
             expensesContext.updateExpense(expenseId,expenseData );
             const res = await updateExpense(expenseId,expenseData );
         } else {
+             setIsSubmiiting(true)
+
             const id = await storeExpense(expenseData);            
             expensesContext.addExpense({...expenseData, id:id});
         }
+        setIsSubmiiting(false);
         navigation.goBack();
     }
 
+    if(isSubmitting) {
+        return <LoadingOverlay />
+    }
     return (
-        <View style={styles.constainer}>
+        <View style={styles.container}>
             <ExpenseForm isEditing={isEditing} onCancel={cancelHandler} onSubmit={confirmHandler}
             defaultValues={selectedExpense} />
             
@@ -62,7 +76,7 @@ function ManageExpenses({ route, navigation }) {
 export default ManageExpenses;
 
 const styles = StyleSheet.create({
-    constainer: {
+    container: {
         flex: 1,
         padding: 24,
         backgroundColor: GlobalStyles.colors.primary800
