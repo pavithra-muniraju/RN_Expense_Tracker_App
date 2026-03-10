@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import Input from "./Input";
 import { useContext, useState } from "react";
 import Button from "../../UI/Button";
 import { getFormatedDate } from "../../util/date";
+import { GlobalStyles } from "../../constants/styles";
 
 function ExpenseForm({ isEditing, onCancel, onSubmit, defaultValues }) {
 
@@ -24,70 +25,99 @@ function ExpenseForm({ isEditing, onCancel, onSubmit, defaultValues }) {
     // } or u can use below
 
     const [inputValues, setInputValues] = useState({
-        amount: defaultValues ? defaultValues.amount.toString() : '',
-        date: defaultValues ? getFormatedDate(defaultValues.date) : '',
-        desc: defaultValues ? defaultValues.desc : ''
+        amount: {
+            value: defaultValues ? defaultValues.amount.toString() : '',
+            isValid: defaultValues ? true : false
+        },
+        date: {
+            value: defaultValues ? getFormatedDate(defaultValues.date) : '',
+            isValid: defaultValues ? true : false
+        },
+        desc: {
+            value: defaultValues ? defaultValues.desc : '',
+            isValid: !!defaultValues
+        },
     })
 
     function inputChangedHandler(inputId, enteredText) {
         setInputValues((curState) => {
             return {
                 ...curState,
-                [inputId]: enteredText
+                // [inputId]: enteredText
+                [inputId]: { value: enteredText, isValid: true }
             }
         });
-       
-    }
 
+    }
 
     function submitHandler() {
         const expenseData = {
-            amount: +inputValues.amount,
-            date: new Date(inputValues.date),
-            desc: inputValues.desc
+            amount: +inputValues.amount.value,
+            date: new Date(inputValues.date.value),
+            desc: inputValues.desc.value,
+        };
+
+        // if (isNaN(expenseData.amount) || expenseData.amount < 1) {
+        //     Alert.alert('Amount should be a number greater than 0');
+        // } else if (expenseData.date.toString() === 'Invalid Date') {
+        //     Alert.alert('Please enter a proper date')
+        // } else if (expenseData.desc.trim().length < 1) {
+        //     Alert.alert('Please enter the Description')
+        // } else {
+        //     onSubmit(expenseData)
+        // }
+
+        const amountIsValid = !isNaN(expenseData.amount) && expenseData.amount > 0;
+        const dateIsValid = expenseData.date?.toString() !== 'Invalid Date';
+        const descriptionIsValid = expenseData.desc?.trim().length > 0;
+
+        if (!amountIsValid || !dateIsValid || !descriptionIsValid) {
+            // Alert.alert('Invalid input', 'Please check your input values');
+            setInputValues((curInputs) => {
+                return {
+                    amount: { value: curInputs.amount.value, isValid: amountIsValid },
+                    date: { value: curInputs.date.value, isValid: dateIsValid },
+                    desc: {
+                        value: curInputs.desc.value,
+                        isValid: descriptionIsValid,
+                    },
+                };
+            });
+            return;
         }
 
-         onSubmit(expenseData)
+        onSubmit(expenseData);
     }
-    // function confirmHandler() {
-    //     if (isEditing) {
-    //         expensesContext.updateExpense(expenseId,
-    //             inputValues
-    //         )
-    //     } else {
-    //         expensesContext.addExpense(
-    //             {
-    //                 desc: 'test',
-    //                 amount: 99,
-    //                 date: new Date('2026-03-04')
-    //             }
-    //         )
-    //     }
-    //     navigation.goBack();
-    // }
+
+    const formIsInvalid = !inputValues.amount.isValid || !inputValues.date.isValid || !inputValues.desc.isValid;
     return (
         <View style={styles.form}>
             <Text style={styles.title}>Track your Expenses</Text>
             <View style={styles.container}>
-                <Input label='Amount' style={styles.rowInputstyle} textInputConfig={{
-                    keyboardType: 'decimal-pad',
-                    onChangeText: inputChangedHandler.bind(this, 'amount'),
-                    value: inputValues.amount
-                }} />
-                <Input label='Date' style={styles.rowInputstyle} textInputConfig={{
-                    placeholder: 'yyyy-mm-dd',
-                    maxLength: 10,
-                    onChangeText: inputChangedHandler.bind(this, 'date'),
-                    value: inputValues.date
-                }} />
+                <Input label='Amount'
+                    style={styles.rowInputstyle}
+                    invalid={!inputValues.amount.isValid} textInputConfig={{
+                        keyboardType: 'decimal-pad',
+                        onChangeText: inputChangedHandler.bind(this, 'amount'),
+                        value: inputValues.amount.value
+                    }} />
+                <Input label='Date' style={styles.rowInputstyle}
+                    invalid={!inputValues.date.isValid} textInputConfig={{
+                        placeholder: 'yyyy-mm-dd',
+                        maxLength: 10,
+                        onChangeText: inputChangedHandler.bind(this, 'date'),
+                        value: inputValues.date.value
+                    }} />
             </View>
 
-            <Input label='Desc' textInputConfig={{
-                multiline: true,
-                onChangeText: inputChangedHandler.bind(this, 'desc'),
-                value: inputValues.desc
-            }} />
+            <Input label='Desc' invalid={!inputValues.desc.isValid}
+                textInputConfig={{
+                    multiline: true,
+                    onChangeText: inputChangedHandler.bind(this, 'desc'),
+                    value: inputValues.desc.value
+                }} />
 
+            {formIsInvalid && <Text style={styles.errorText}>Invalid Inputs, please  checjk data</Text>}
             <View style={styles.buttonStyles}>
                 <Button children='Cancel' mode='flat'
                     onPress={onCancel}
@@ -122,7 +152,7 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 50
     },
-        backButton: {
+    backButton: {
         minWidth: 120,
         marginHorizontal: 8
     },
@@ -130,5 +160,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    errorText: {
+        textAlign: 'center',
+        color: GlobalStyles.colors.error500,
+        margin: 8
     }
 })
