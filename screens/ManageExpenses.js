@@ -7,16 +7,18 @@ import { ExpensesContext } from "../store/ExpensesContext";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 import { deleteExpense, storeExpense, updateExpense } from "../util/http";
 import LoadingOverlay from "../UI/LoadingOverlay";
+import ErrorOverlay from "../UI/ErrorOverlay";
 function ManageExpenses({ route, navigation }) {
 
     const expenseId = route.params?.expenseId;
     const isEditing = !!expenseId;
 
     const expensesContext = useContext(ExpensesContext);
-    
+
     const selectedExpense = expensesContext.expenses.find(expense => expense.id == expenseId);
 
-    const [isSubmitting, setIsSubmiiting] = useState()
+    const [isSubmitting, setIsSubmiiting] = useState();
+    const [error, setError] = useState();
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -27,10 +29,17 @@ function ManageExpenses({ route, navigation }) {
     async function deleteExpenseHandler() {
         setIsSubmiiting(true);
         expensesContext.deleteExpense(expenseId);
-        await deleteExpense(expenseId);
-        setIsSubmiiting(false)
-        navigation.goBack();
-        
+        try {
+            await deleteExpense(expenseId);
+            setIsSubmiiting(false)
+            navigation.goBack();
+        } catch (error) {
+            setError('Unable to delete, try again');
+            setIsSubmiiting(false)
+        }
+
+
+
     }
 
     function cancelHandler() {
@@ -38,29 +47,40 @@ function ManageExpenses({ route, navigation }) {
     }
 
     async function confirmHandler(expenseData) {
-       
-        if (isEditing) {
-             setIsSubmiiting(true)
-            expensesContext.updateExpense(expenseId,expenseData );
-            const res = await updateExpense(expenseId,expenseData );
-        } else {
-             setIsSubmiiting(true)
 
-            const id = await storeExpense(expenseData);            
-            expensesContext.addExpense({...expenseData, id:id});
+        try {
+            if (isEditing) {
+                setIsSubmiiting(true)
+                expensesContext.updateExpense(expenseId, expenseData);
+                const res = await updateExpense(expenseId, expenseData);
+            } else {
+                setIsSubmiiting(true)
+
+                const id = await storeExpense(expenseData);
+                expensesContext.addExpense({ ...expenseData, id: id });
+            }
+            setIsSubmiiting(false);
+            navigation.goBack();
+        } catch (error) {
+            setError('unable to save data, please try again')
         }
-        setIsSubmiiting(false);
-        navigation.goBack();
-    }
 
-    if(isSubmitting) {
+    }
+    function errorHandler() {
+        setError(null);
+        setIsSubmiiting(false)
+    }
+    if (error) {
+        return <ErrorOverlay message={error} onConfirm={errorHandler} />
+    }
+    if (isSubmitting) {
         return <LoadingOverlay />
     }
     return (
         <View style={styles.container}>
             <ExpenseForm isEditing={isEditing} onCancel={cancelHandler} onSubmit={confirmHandler}
-            defaultValues={selectedExpense} />
-            
+                defaultValues={selectedExpense} />
+
             {isEditing && (
                 <View style={styles.deleteContainer}>
                     <IconButton name="trash"

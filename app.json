@@ -11,7 +11,8 @@
       "backgroundColor": "#ffffff"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/f42ba941-4bdb-4c5b-ae17-e878551a86b8"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -30,7 +31,7 @@
     },
     "extra": {
       "eas": {
-        
+        "projectId": "f42ba941-4bdb-4c5b-ae17-e878551a86b8"
       }
     },
     "owner": "177391",
