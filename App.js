@@ -9,9 +9,12 @@ import { GlobalStyles } from './constants/styles';
 import { Ionicons } from '@expo/vector-icons'
 import IconButton from './UI/IconButton';
 import ExpensesContextProvider from './store/ExpensesContext';
+import Login from './screens/Login';
+import Signup from './screens/Signup';
 
 export default function App() {
 
+  const isloggedIn = false;
 
   function ExpensesOverview() {
     const navigation = useNavigation();
@@ -42,24 +45,44 @@ export default function App() {
   }
   const Stack = createNativeStackNavigator();
   const BottomTabs = createBottomTabNavigator();
-  return (
-    <>
-      <StatusBar style="inverted" />
-      <ExpensesContextProvider>
+  if (isloggedIn) {
+    return (
+      <>
+        <StatusBar style="inverted" />
+        <ExpensesContextProvider>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{
+              headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
+              headerTintColor: 'white',
+            }}>
+              <Stack.Screen name="ExpensesOverview" component={ExpensesOverview} options={{ headerShown: false }} />
+              <Stack.Screen name="ManageExpenses" component={ManageExpenses} options={{
+                presentation: 'modal'
+              }} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ExpensesContextProvider>
+      </>
+
+    );
+  } else {
+    return (
+      <>
+        <StatusBar style="inverted" />
         <NavigationContainer>
           <Stack.Navigator screenOptions={{
             headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
             headerTintColor: 'white',
+            contentStyle: {backgroundColor: GlobalStyles.colors.primary50 }
           }}>
-            <Stack.Screen name="ExpensesOverview" component={ExpensesOverview} options={{ headerShown: false }} />
-            <Stack.Screen name="ManageExpenses" component={ManageExpenses} options={{
-              presentation: 'modal'
-            }} />
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Signup" component={Signup} />
           </Stack.Navigator>
         </NavigationContainer>
-      </ExpensesContextProvider>
-    </>
+      </>
+    )
 
-  );
+  }
+
 }
 
