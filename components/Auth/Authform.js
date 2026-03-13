@@ -5,7 +5,7 @@ import Button from "../../UI/Button";
 import { useNavigation } from "@react-navigation/native";
 import Input from "../ManageExpense/Input";
 
-function Authform({ type }) {
+function Authform({ type, onAuthenticate })  {
     const navigation = useNavigation();
     const [credentials, setCredentials] = useState({
         email: {
@@ -24,9 +24,9 @@ function Authform({ type }) {
 
     function switchHandler() {
         if (type == 'Login') {
-            navigation.navigate("Signup")
+            navigation.replace("Signup")
         } else {
-            navigation.navigate("Login")
+            navigation.replace("Login")
         }
     }
 
@@ -41,19 +41,31 @@ function Authform({ type }) {
 
     }
     function loginSignupHandler() {
+        const email = credentials.email.value;
+        const password = credentials.password.value
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if(!emailRegex.test(credentials.email.value)) {
+        if (!emailRegex.test(credentials.email.value)) {
             credentials.email.isValid = false;
-            Alert.alert('Invalid Email')
-        } else if(credentials.password.value.length < 1) {
+            Alert.alert('Invalid Email');
+            return
+        } else if (credentials.password.value.length < 1) {
             credentials.password.isValid = false;
             Alert.alert('Please enter password')
+            return
+
         }
-        if(type == 'Signup' && credentials.cPassword.value !== credentials.password.value) {
-           credentials.cPassword.isValid = false
-           Alert.alert('Passwords do not match')
+        if (type == 'Signup' && credentials.cPassword.value !== credentials.password.value) {
+            credentials.cPassword.isValid = false
+            Alert.alert('Passwords do not match')
+            return
+
         }
-        console.log(credentials)
+        onAuthenticate({
+            email: credentials.email.value,
+            password: credentials.password.value
+        });
+
+        
     }
     return (
         <View style={styles.outerContainer}>
