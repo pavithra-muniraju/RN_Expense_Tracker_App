@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Authform from "../components/Auth/Authform";
 import { authenticateUser } from "../util/auth";
 import LoadingOverlay from "../UI/LoadingOverlay";
 import { Alert } from "react-native";
+import { AuthContext } from "../store/AuthContext";
 
 function Login() {
     const [isLoading, setIsLoading] = useState(false);
+
+    const authContext = useContext(AuthContext)
 
     async function signupHandler({ email, password }) {
         console.log(email, password);
@@ -13,7 +16,7 @@ function Login() {
         try {
             const response = await authenticateUser(email, password, 'signInWithPassword');
             console.log(response);
-
+            authContext.authenticate(response.idToken);
             Alert.alert('User Logged in Succesfull')
         } catch (error) {
             console.log(error.response.data);
