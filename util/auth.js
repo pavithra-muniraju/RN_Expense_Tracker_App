@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_KEY = 'AIzaSyDOEueG0jEG41k7c1JZ0iQmDRqBVqC6OIE'
+const API_KEY = 'PAIzaSyCKJ1V1_XA_Pvt2XxKefwUtnqRwElBGVVM_Muniraju'
 
 
 export async function authenticateUser(email, password, mode) {
