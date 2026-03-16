@@ -12,7 +12,10 @@ import ExpensesContextProvider from './store/ExpensesContext';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
 import AuthContextProvider, { AuthContext } from './store/AuthContext';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { View } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AppLoading from 'expo-app-loading';
 const Stack = createNativeStackNavigator();
 const BottomTabs = createBottomTabNavigator();
 
@@ -35,6 +38,7 @@ function AuthStack() {
 
 function ExpensesOverview() {
   const navigation = useNavigation();
+  const authContext = useContext(AuthContext)
   return (
     <BottomTabs.Navigator screenOptions={{
       headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
@@ -42,11 +46,22 @@ function ExpensesOverview() {
       tabBarStyle: { backgroundColor: GlobalStyles.colors.primary500 },
       tabBarActiveTintColor: 'white',
       headerRight: ({ tintColor }) =>
-        <IconButton name='add'
-          size={24}
-          color={tintColor}
-          onPress={() => navigation.navigate("ManageExpenses")}
-        />
+      (
+        <View style={{ flexDirection: 'row' }}>
+          <IconButton name='add'
+            size={24}
+            color={tintColor}
+            onPress={() => navigation.navigate("ManageExpenses")}
+          />
+          <IconButton
+            name="exit"
+            size={24}
+            color={tintColor}
+            onPress={authContext.logout}
+          />
+        </View>
+      )
+
 
     }}>
       <BottomTabs.Screen name="Recent Expenses" component={RecentExpenses} options={{
@@ -62,10 +77,12 @@ function ExpensesOverview() {
 }
 
 function AuthenticatedStack() {
+  const authContext = useContext(AuthContext)
   return (
     <Stack.Navigator screenOptions={{
       headerStyle: { backgroundColor: GlobalStyles.colors.primary500 },
       headerTintColor: 'white',
+      headerRight: ({ tintColor }) => <IconButton name="exit" color={tintColor} size={24} onPress={authContext.logout} />
     }}>
       <Stack.Screen name="ExpensesOverview" component={ExpensesOverview} options={{ headerShown: false }} />
       <Stack.Screen name="ManageExpenses" component={ManageExpenses} options={{
@@ -82,20 +99,40 @@ function Navigation() {
   return (
 
     <NavigationContainer>
-      {!authContext.isAuthenticated && <AuthStack /> }
-      {authContext.isAuthenticated && <AuthenticatedStack /> }
+      {!authContext.isAuthenticated && <AuthStack />}
+      {authContext.isAuthenticated && <AuthenticatedStack />}
     </NavigationContainer>
 
   )
 }
-export default function App() {
 
+function Root() {
+console.log('storedToken', AsyncStorage.getItem('token'))
+  const [isLoadingFromStorage, setIsLoadingFromStorage] = useState(true);
+const authContext = useContext(AuthContext)
+  useEffect(() => {
+    async function fetchToken() {
+      const storedToken = await AsyncStorage.getItem('token');
+      if (storedToken) {
+        authContext.authenticate(storedToken)
+      }
+      console.log(storedToken, 'storedtoken')
+      setIsLoadingFromStorage(false)
+    }
+    fetchToken();
+  }, [])
+
+ 
+  return <Navigation />
+}
+export default function App() {
+    
   return (
     <>
       <StatusBar style="inverted" />
       <AuthContextProvider>
         <ExpensesContextProvider>
-          <Navigation />
+          <Root />
         </ExpensesContextProvider>
       </AuthContextProvider>
     </>
